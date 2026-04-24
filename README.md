@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chat with KawnAI (web prototype)
 
-## Getting Started
+Standalone Next.js app: dark Kawn-style chat UI and **`POST /api/kawn-ai/chat`** backed by the OpenAI **Responses API**, with automatic fallback to `buildMockKawnAiReply` when the key is missing or the request fails.
 
-First, run the development server:
+## Setup
+
+Copy `.env.example` to `.env.local` and set a real key:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `OPENAI_API_KEY` — required for live KawnAI replies (never commit real values).
+- `KAWNAI_MODEL` — defaults to `gpt-4.1-mini` if unset.
+- `KAWNAI_WEB_SEARCH` — defaults to **on** (any value except `0`). The API calls OpenAI’s **Responses API with the built-in `web_search` tool** so questions about FIFA schedules, groups, and opening matches can use **current web sources** instead of stale training data alone. Set to `0` to disable (lower cost; less reliable for “what’s the first match?” style questions).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Why answers sometimes looked “wrong” before
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The backend **was already calling OpenAI**. A plain model reply only knows facts up to its training cutoff and tends to hedge on post-cutoff tournaments. **Web search** (now enabled by default) lets the same API **retrieve up-to-date official listings** before answering.
 
-## Learn More
+## Run locally
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API (Flutter / mobile)
 
-## Deploy on Vercel
+**`POST /api/kawn-ai/chat`**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Request body:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "groupId": "world-cup-2026",
+  "groupName": "FIFA World Cup 2026",
+  "userId": "demo-user",
+  "userLanguage": "auto",
+  "message": "When is France playing next?"
+}
+```
+
+Optional: `metaInquiriesSoFar` (number) — used only when the server falls back to the mock.
+
+Response:
+
+```json
+{
+  "reply": "assistant reply here",
+  "source": "kawnai"
+}
+```
+
+`source` is `"kawnai"` when the reply came from the model, and `"mock"` when the mock fallback was used.
+
+Live integration lives in `src/app/api/kawn-ai/chat/route.ts`; system instructions in `src/lib/kawnAiSystemPrompt.ts`.
