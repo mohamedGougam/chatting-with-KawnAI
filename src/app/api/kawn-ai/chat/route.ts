@@ -5,7 +5,7 @@ import {
   buildMockKawnAiReply,
   type KawnAiChatRequest,
 } from "@/lib/mockKawnAiReply";
-import { openai } from "@/lib/openaiClient";
+import { getOpenAIClient } from "@/lib/openaiClient";
 import { sanitizeKawnAiReplyForUser } from "@/lib/sanitizeKawnAiReply";
 
 /**
@@ -89,6 +89,7 @@ ${message}
   }
 
   try {
+    const openai = getOpenAIClient();
     const model = process.env.KAWNAI_MODEL?.trim() || "gpt-4.1-mini";
     // Web search lets the model pull current FIFA / fixture facts instead of stale training data only.
     const webSearchEnabled = process.env.KAWNAI_WEB_SEARCH !== "0";
