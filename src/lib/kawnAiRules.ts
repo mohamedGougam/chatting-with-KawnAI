@@ -57,11 +57,55 @@ export function isKawnDeveloperQuestion(raw: string): boolean {
   return dev;
 }
 
+/**
+ * User asks who/what the **chat assistant** is (KawnAI), not Kawn the company/app.
+ */
+export function isKawnAiAssistantIntroQuestion(raw: string): boolean {
+  const s = norm(raw);
+  if (!s) return false;
+
+  if (/\bwho\s+is\s+kawn\b/i.test(raw) || /\bwhat\s+is\s+kawn\b/i.test(s)) {
+    return false;
+  }
+
+  if (
+    /\b(who|what)\s+are\s+you\b(?!\s+(talking|doing|trying|going|wearing|looking|saying|asking|reading|playing|working|up\s+to)\b)/.test(
+      s,
+    )
+  ) {
+    return true;
+  }
+  if (/\bwhat\s+are\s+u\b/.test(s)) return true;
+  if (/\bintroduce\s+yourself\b/.test(s)) return true;
+  if (/\bwhat('s| is)\s+your\s+name\b/.test(s)) return true;
+  if (/\btell\s+me\s+about\s+yourself\b/.test(s)) return true;
+  if (/\bwho\s+might\s+you\s+be\b/.test(s)) return true;
+
+  if (/\bqui\s+es-tu\b/.test(s) || /\bqui\s+êtes-vous\b/.test(s)) return true;
+  if (/\bqu['']es-tu\b/.test(s) || /\bqu['']est-ce\s+que\s+tu\s+es\b/.test(s)) return true;
+  if (/\bquién\s+eres\b/.test(s) || /\bqué\s+eres\b/.test(s)) return true;
+  if (/\bwer\s+bist\s+du\b/.test(s) || /\bwas\s+bist\s+du\b/.test(s)) return true;
+  if (/\bchi\s+sei\b/.test(s)) return true;
+  if (/\bquem\s+é\s+você\b/.test(s) || /\bquem\s+es\s+tu\b/.test(s)) return true;
+  if (/\bwie\s+ben\s+je\b/.test(s)) return true;
+  if (/\bkim\s+jesteś\b/.test(s)) return true;
+  if (/\bkimsin\b/.test(s) || /\bsen\s+kinsin\b/.test(s)) return true;
+
+  if (/من\s*أنت|ماذا\s*أنت|من\s+انت/i.test(raw)) return true;
+  if (/你是谁|你是什么/.test(raw)) return true;
+  if (/あなたは誰|君は誰/.test(raw)) return true;
+  if (/누구세요|당신은\s*누구/.test(raw)) return true;
+  if (/кто\s+ты|что\s+ты\s+такое|кто\s+вы/i.test(raw)) return true;
+
+  return false;
+}
+
 /** What / who is Kawn, describe the app — not developer or HQ. */
 export function isKawnIdentityQuestion(raw: string): boolean {
   const s = norm(raw);
   if (!s) return false;
 
+  if (isKawnAiAssistantIntroQuestion(raw)) return false;
   if (isKawnDeveloperQuestion(raw) || isKawnLocationQuestion(raw)) return false;
 
   const aboutKawn =
@@ -99,7 +143,12 @@ export function isMetaQuestion(raw: string): boolean {
   const s = norm(raw);
   if (!s) return false;
 
-  if (isKawnIdentityQuestion(raw) || isKawnDeveloperQuestion(raw) || isKawnLocationQuestion(raw)) {
+  if (
+    isKawnAiAssistantIntroQuestion(raw) ||
+    isKawnIdentityQuestion(raw) ||
+    isKawnDeveloperQuestion(raw) ||
+    isKawnLocationQuestion(raw)
+  ) {
     return false;
   }
 

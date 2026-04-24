@@ -4,12 +4,14 @@
  */
 
 import {
+  getKawnAiAssistantIntroReply,
   KAWN_BRAND_DEVELOPER_REPLY,
   KAWN_BRAND_IDENTITY_REPLY,
   KAWN_BRAND_LOCATION_REPLY,
 } from "./kawnAiBranding";
 import {
   hintsCommunityExploration,
+  isKawnAiAssistantIntroQuestion,
   isKawnDeveloperQuestion,
   isKawnIdentityQuestion,
   isKawnLocationQuestion,
@@ -49,13 +51,16 @@ function pickCommunityReply(message: string, groupName: string): string {
 }
 
 export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
-  const { message, groupName, metaInquiriesSoFar = 0 } = input;
+  const { message, groupName, metaInquiriesSoFar = 0, userLanguage } = input;
 
   if (isKawnLocationQuestion(message)) {
     return KAWN_BRAND_LOCATION_REPLY;
   }
   if (isKawnDeveloperQuestion(message)) {
     return KAWN_BRAND_DEVELOPER_REPLY;
+  }
+  if (isKawnAiAssistantIntroQuestion(message)) {
+    return getKawnAiAssistantIntroReply(message, userLanguage);
   }
   if (isKawnIdentityQuestion(message)) {
     return KAWN_BRAND_IDENTITY_REPLY;
