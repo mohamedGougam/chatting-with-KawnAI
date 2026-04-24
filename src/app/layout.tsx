@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Chat with KawnAI",
   description: "KawnAI chat — ask anything you want to know.",
+  icons: {
+    icon: [{ url: "/kawn-logo.png", type: "image/png" }],
+    apple: "/kawn-logo.png",
+  },
 };
 
 export default function RootLayout({
