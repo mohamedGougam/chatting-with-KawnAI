@@ -86,7 +86,7 @@ ${message}
 
   try {
     const openai = getOpenAIClient();
-    const model = process.env.KAWNAI_MODEL?.trim() || "gpt-4.1-mini";
+    const model = process.env.KAWNAI_MODEL?.trim() || "gpt-4o";
     // Web search helps with current events, schedules, and facts instead of relying on training data alone.
     const webSearchEnabled = process.env.KAWNAI_WEB_SEARCH !== "0";
 

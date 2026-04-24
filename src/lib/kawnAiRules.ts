@@ -3,23 +3,21 @@
  * No provider names appear in user-facing strings from this file.
  */
 
-const HAS_KAWN = /\bkawn\b/i;
+/** Kawn, KawnAI, “Kawn AI”, Kawn app — whole-word safe for “kawnai”. */
+const MENTIONS_KAWN_BRAND = /\b(kawnai|kawn\s*ai|kawn(?:\s+app)?)\b/i;
 
 function norm(raw: string): string {
   return raw.toLowerCase().trim();
+}
+
+function mentionsKawnBrand(s: string): boolean {
+  return MENTIONS_KAWN_BRAND.test(s);
 }
 
 /** Geography / HQ / origin — Kawn or “this app” in a where-from sense. */
 export function isKawnLocationQuestion(raw: string): boolean {
   const s = norm(raw);
   if (!s) return false;
-
-  const aboutKawnOrApp =
-    HAS_KAWN.test(s) ||
-    /\b(this|the)\s+(app|application)\b/i.test(s) ||
-    /\bkawn\s+app\b/i.test(s);
-
-  if (!aboutKawnOrApp) return false;
 
   const geo =
     /\b(where|headquarters|\bhq\b|based|located|location|country|countries|origin|founded|geograph|from\s+what\s+country|which\s+country|what\s+country)\b/i.test(
@@ -28,7 +26,19 @@ export function isKawnLocationQuestion(raw: string): boolean {
     /\bwhere\s+(is|are|'s|was)\b/i.test(s) ||
     /\bcome\s+from\b/i.test(s);
 
-  return geo;
+  if (!geo) return false;
+
+  const aboutKawnOrApp =
+    mentionsKawnBrand(s) ||
+    /\b(this|the)\s+(app|application)\b/i.test(s) ||
+    /\bkawn\s+app\b/i.test(s);
+
+  const assistantWhere =
+    /\bwhere\s+are\s+you\s+(based|located|headquartered)\b/.test(s) ||
+    /\bwhere\s+do\s+you\s+(operate|come\s+from|work\s+from)\b/.test(s) ||
+    /\bwhere\s+is\s+your\s+(hq|headquarters|office|home)\b/.test(s);
+
+  return aboutKawnOrApp || assistantWhere;
 }
 
 /** Who built / developed / owns Kawn (not “who is Kawn” identity). */
@@ -38,8 +48,15 @@ export function isKawnDeveloperQuestion(raw: string): boolean {
 
   if (/\bwho\s+is\s+kawn\b/i.test(raw)) return false;
 
+  if (
+    /\bwho\s+(built|created|made|owns?)\s+you\b/.test(s) ||
+    /\bwho\s+(built|created|made)\s+(the\s+)?(assistant|chatbot|bot)\b/.test(s)
+  ) {
+    return true;
+  }
+
   const mentionsKawn =
-    HAS_KAWN.test(s) ||
+    mentionsKawnBrand(s) ||
     /\bkawn\s+technologies\b/i.test(s) ||
     (/\b(this|the)\s+(app|application)\b/i.test(s) &&
       /\b(who|whom|developer|development|creator|created|built|founded|owns?|owned|company\s+behind)\b/i.test(
@@ -67,6 +84,8 @@ export function isKawnAiAssistantIntroQuestion(raw: string): boolean {
   if (/\bwho\s+is\s+kawn\b/i.test(raw) || /\bwhat\s+is\s+kawn\b/i.test(s)) {
     return false;
   }
+
+  if (/\bwho\s+is\s+kawnai\b/i.test(s)) return true;
 
   if (
     /\b(who|what)\s+are\s+you\b(?!\s+(talking|doing|trying|going|wearing|looking|saying|asking|reading|playing|working|up\s+to)\b)/.test(
@@ -109,7 +128,7 @@ export function isKawnIdentityQuestion(raw: string): boolean {
   if (isKawnDeveloperQuestion(raw) || isKawnLocationQuestion(raw)) return false;
 
   const aboutKawn =
-    HAS_KAWN.test(s) ||
+    mentionsKawnBrand(s) ||
     /\b(this|the)\s+(app|application)\b/i.test(s) ||
     /\bkawn\s+app\b/i.test(s);
 
@@ -118,7 +137,7 @@ export function isKawnIdentityQuestion(raw: string): boolean {
   if (
     /\b(tell|learn|know|more)\s+(me\s+)?(about|regarding)\s+kawn\b/i.test(s) ||
     /\babout\s+kawn\b/i.test(s) ||
-    /\bwhat\s+is\s+(kawn|the\s+kawn\s+app)\b/i.test(s) ||
+    /\bwhat\s+is\s+(kawn|kawnai|the\s+kawn\s+app)\b/i.test(s) ||
     /\bwhat\s+does\s+kawn(\s+app)?\s+do\b/i.test(s) ||
     /\bwho\s+is\s+kawn\b/i.test(s) ||
     /\b(describe|explain|introduce)\s+(me\s+)?(to\s+)?kawn\b/i.test(s) ||
@@ -172,7 +191,7 @@ export function isMetaQuestion(raw: string): boolean {
 
   if (s.includes("what model") || s.includes("which model")) return true;
   if (s.includes("what is behind") || s.includes("what's behind")) return true;
-  if (/\bwho\s+(powers|built)\s+(you|u|this(\s+(ai|bot|assistant|chatbot))?)\b/i.test(s)) {
+  if (/\bwho\s+powers\s+(you|u|this(\s+(ai|bot|assistant|chatbot))?)\b/i.test(s)) {
     return true;
   }
 
