@@ -3,7 +3,18 @@
  * or the KawnAI model request fails. Keeps the chat usable without exposing errors.
  */
 
-import { hintsCommunityExploration, isMetaQuestion } from "./kawnAiRules";
+import {
+  KAWN_BRAND_DEVELOPER_REPLY,
+  KAWN_BRAND_IDENTITY_REPLY,
+  KAWN_BRAND_LOCATION_REPLY,
+} from "./kawnAiBranding";
+import {
+  hintsCommunityExploration,
+  isKawnDeveloperQuestion,
+  isKawnIdentityQuestion,
+  isKawnLocationQuestion,
+  isMetaQuestion,
+} from "./kawnAiRules";
 
 export type KawnAiChatRequest = {
   groupId: string;
@@ -39,6 +50,16 @@ function pickCommunityReply(message: string, groupName: string): string {
 
 export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
   const { message, groupName, metaInquiriesSoFar = 0 } = input;
+
+  if (isKawnLocationQuestion(message)) {
+    return KAWN_BRAND_LOCATION_REPLY;
+  }
+  if (isKawnDeveloperQuestion(message)) {
+    return KAWN_BRAND_DEVELOPER_REPLY;
+  }
+  if (isKawnIdentityQuestion(message)) {
+    return KAWN_BRAND_IDENTITY_REPLY;
+  }
 
   if (isMetaQuestion(message)) {
     return metaInquiriesSoFar >= 1 ? META_FOLLOW_UP : META_FIRST;
