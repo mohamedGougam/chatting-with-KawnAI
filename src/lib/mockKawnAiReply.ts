@@ -48,5 +48,5 @@ export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
     return pickCommunityReply(message, groupName);
   }
 
-  return `Let me check that for you. Answers tailored to ${groupName} will appear here once the group knowledge is connected.`;
+  return `I can help with a wide range of topics. For your question about that, a fuller answer will appear here when KawnAI is connected with live knowledge—in the meantime, try rephrasing or ask something more specific.`;
 }

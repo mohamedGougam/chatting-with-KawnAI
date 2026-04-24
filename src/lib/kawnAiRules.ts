@@ -10,6 +10,7 @@ export function isMetaQuestion(raw: string): boolean {
   if (/\b(openai|chatgpt|gpt)\b/i.test(s)) return true;
   if (/\bapi\b/i.test(s)) return true;
   if (s.includes("backend")) return true;
+  if (/\bwhat\b.*\bbuilt\b/i.test(s) && /\b(you|kawn)/i.test(s)) return true;
   if (s.includes("technical provider")) return true;
 
   if (/\bmodel\b/i.test(s)) {

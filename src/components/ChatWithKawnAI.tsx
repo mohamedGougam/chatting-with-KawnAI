@@ -17,13 +17,13 @@ export type ChatLine = {
 
 const WELCOME = `✨ **Hi — I'm KawnAI.**
 
-Thanks for chatting with KawnAI. Tell me what you would like to know, and I'll check it for you.
+Thanks for chatting with KawnAI. Tell me what you would like to know, and I'll do my best to help.
 
-⚽ Ask about fixtures, this group, or anything you're curious about.`;
+Ask about anything you're curious about—your community, sports, work, learning, or everyday questions.`;
 
-/** Default context for the API when no community picker is shown. */
-const DEFAULT_GROUP_ID = "world-cup-2026";
-const DEFAULT_GROUP_NAME = "FIFA World Cup 2026";
+/** Default context for the API when no community picker is shown (generic; clients may override). */
+const DEFAULT_GROUP_ID = "general";
+const DEFAULT_GROUP_NAME = "General";
 
 export function ChatWithKawnAI() {
   const [groupId] = useState<string>(DEFAULT_GROUP_ID);

@@ -66,17 +66,13 @@ export async function POST(req: Request) {
   const userId = payload.userId;
 
   const userContent = `
-Community Group:
-${groupName}
+Optional Kawn community context (use only if the user is asking about this community, its topic, or something clearly tied to it—not for unrelated questions):
+- Group name: ${groupName}
+- Group ID: ${groupId}
 
-Group ID:
-${groupId}
-
-User ID:
-${userId ?? "(not provided)"}
-
-User language:
-${userLanguage ?? "auto"}
+Session:
+- User ID: ${userId ?? "(not provided)"}
+- User language: ${userLanguage ?? "auto"}
 
 User message:
 ${message}
@@ -91,7 +87,7 @@ ${message}
   try {
     const openai = getOpenAIClient();
     const model = process.env.KAWNAI_MODEL?.trim() || "gpt-4.1-mini";
-    // Web search lets the model pull current FIFA / fixture facts instead of stale training data only.
+    // Web search helps with current events, schedules, and facts instead of relying on training data alone.
     const webSearchEnabled = process.env.KAWNAI_WEB_SEARCH !== "0";
 
     const baseParams = {
