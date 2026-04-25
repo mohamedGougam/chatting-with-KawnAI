@@ -14,26 +14,26 @@ export const KAWN_BRAND_LOCATION_REPLY =
 
 /** English baseline; live model translates; mock uses `getKawnAiAssistantIntroReply`. */
 export const KAWN_ASSISTANT_INTRO_EN =
-  "I am KawnAI the AI Brain of Kawn, what do you want to chat about?";
+  "Hey there, I am KawnAI the AI Brain of Kawn, what do you have in mind today?";
 
 const ASSISTANT_INTRO_I18N: Record<string, string> = {
   en: KAWN_ASSISTANT_INTRO_EN,
-  ar: "أنا KawnAI، العقل الاصطناعي لـ Kawn، ماذا تريد أن نتحدث عنه؟",
-  es: "Soy KawnAI, el cerebro de IA de Kawn, ¿sobre qué quieres charlar?",
-  fr: "Je suis KawnAI, le cerveau IA de Kawn — de quoi veux-tu parler ?",
-  de: "Ich bin KawnAI, das KI-Gehirn von Kawn – worüber möchtest du chatten?",
-  pt: "Sou o KawnAI, o cérebro de IA do Kawn — sobre o que você quer conversar?",
-  it: "Sono KawnAI, il cervello AI di Kawn — di cosa vuoi parlare?",
-  nl: "Ik ben KawnAI, het AI-brein van Kawn — waar wil je over chatten?",
-  tr: "Ben KawnAI, Kawn'un yapay zekâ beyniyim — ne hakkında konuşmak istersin?",
-  ru: "Я KawnAI, ИИ-мозг Kawn — о чём хочешь поговорить?",
-  hi: "मैं KawnAI हूँ, Kawn का AI मस्तिष्क — आप किस विषय पर बात करना चाहते हैं?",
-  zh: "我是 KawnAI，Kawn 的 AI 大脑——你想聊些什么？",
-  ja: "私は KawnAI、Kawn の AI ブレインです。何について話したいですか？",
-  ko: "저는 KawnAI, Kawn의 AI 두뇌입니다. 무엇에 대해 이야기하고 싶으세요?",
-  id: "Saya KawnAI, otak AI Kawn — mau ngobrol tentang apa?",
-  uk: "Я KawnAI, ШІ-мозок Kawn — про що хочеш поговорити?",
-  pl: "Jestem KawnAI, sztucznym mózgiem Kawn — o czym chcesz porozmawiać?",
+  ar: "مرحبًا، أنا KawnAI، العقل الاصطناعي لـ Kawn — ما الذي يدور في بالك اليوم؟",
+  es: "Hola, soy KawnAI, el cerebro de IA de Kawn. ¿Qué tienes en mente hoy?",
+  fr: "Salut, je suis KawnAI, le cerveau IA de Kawn — qu’as-tu en tête aujourd’hui ?",
+  de: "Hey, ich bin KawnAI, das KI-Gehirn von Kawn – was hast du heute im Sinn?",
+  pt: "Olá, eu sou o KawnAI, o cérebro de IA do Kawn — o que você tem em mente hoje?",
+  it: "Ciao, sono KawnAI, il cervello AI di Kawn — cosa hai in mente oggi?",
+  nl: "Hé, ik ben KawnAI, het AI-brein van Kawn — wat heb je vandaag in gedachten?",
+  tr: "Selam, ben KawnAI, Kawn'un yapay zekâ beyniyim — bugün aklında ne var?",
+  ru: "Привет, я KawnAI, ИИ-мозг Kawn — что у тебя сегодня на уме?",
+  hi: "नमस्ते, मैं KawnAI हूँ, Kawn का AI मस्तिष्क — आज आपके मन में क्या है?",
+  zh: "你好，我是 KawnAI，Kawn 的 AI 大脑——你今天有什么想法？",
+  ja: "こんにちは、私は KawnAI、Kawn の AI ブレインです。今日は何を考えていますか？",
+  ko: "안녕하세요, 저는 KawnAI, Kawn의 AI 두뇌입니다. 오늘 어떤 생각이 있으신가요?",
+  id: "Hai, saya KawnAI, otak AI Kawn — kamu punya ide apa hari ini?",
+  uk: "Привіт, я KawnAI, ШІ-мозок Kawn — що в тебе сьогодні на думці?",
+  pl: "Hej, jestem KawnAI, sztucznym mózgiem Kawn — co masz dziś na myśli?",
 };
 
 function normalizeLangTag(tag: string | undefined): string | null {
