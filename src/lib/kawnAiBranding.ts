@@ -14,26 +14,26 @@ export const KAWN_BRAND_LOCATION_REPLY =
 
 /** English baseline; live model translates; mock uses `getKawnAiAssistantIntroReply`. */
 export const KAWN_ASSISTANT_INTRO_EN =
-  "Hey there, I am KawnAI the AI Brain of Kawn, what do you have in mind today?";
+  "Hey! I’m KawnAI, your go-to for pretty much anything. What’s on your mind today? I’m all ears! ✨👾";
 
 const ASSISTANT_INTRO_I18N: Record<string, string> = {
   en: KAWN_ASSISTANT_INTRO_EN,
-  ar: "مرحبًا، أنا KawnAI، العقل الاصطناعي لـ Kawn — ما الذي يدور في بالك اليوم؟",
-  es: "Hola, soy KawnAI, el cerebro de IA de Kawn. ¿Qué tienes en mente hoy?",
-  fr: "Salut, je suis KawnAI, le cerveau IA de Kawn — qu’as-tu en tête aujourd’hui ?",
-  de: "Hey, ich bin KawnAI, das KI-Gehirn von Kawn – was hast du heute im Sinn?",
-  pt: "Olá, eu sou o KawnAI, o cérebro de IA do Kawn — o que você tem em mente hoje?",
-  it: "Ciao, sono KawnAI, il cervello AI di Kawn — cosa hai in mente oggi?",
-  nl: "Hé, ik ben KawnAI, het AI-brein van Kawn — wat heb je vandaag in gedachten?",
-  tr: "Selam, ben KawnAI, Kawn'un yapay zekâ beyniyim — bugün aklında ne var?",
-  ru: "Привет, я KawnAI, ИИ-мозг Kawn — что у тебя сегодня на уме?",
-  hi: "नमस्ते, मैं KawnAI हूँ, Kawn का AI मस्तिष्क — आज आपके मन में क्या है?",
-  zh: "你好，我是 KawnAI，Kawn 的 AI 大脑——你今天有什么想法？",
-  ja: "こんにちは、私は KawnAI、Kawn の AI ブレインです。今日は何を考えていますか？",
-  ko: "안녕하세요, 저는 KawnAI, Kawn의 AI 두뇌입니다. 오늘 어떤 생각이 있으신가요?",
-  id: "Hai, saya KawnAI, otak AI Kawn — kamu punya ide apa hari ini?",
-  uk: "Привіт, я KawnAI, ШІ-мозок Kawn — що в тебе сьогодні на думці?",
-  pl: "Hej, jestem KawnAI, sztucznym mózgiem Kawn — co masz dziś na myśli?",
+  ar: "مرحبًا! أنا KawnAI — موجودة لمساعدتك تقريبًا في أي شيء. ما الذي يدور في بالك اليوم؟ أنا أستمع! ✨👾",
+  es: "¡Hey! Soy KawnAI, tu apoyo para casi cualquier cosa. ¿Qué tienes en mente hoy? ¡Te escucho! ✨👾",
+  fr: "Hey ! Je suis KawnAI, ton allié pour à peu près tout. Qu’est-ce que tu as en tête aujourd’hui ? Je t’écoute ! ✨👾",
+  de: "Hey! Ich bin KawnAI, dein Go-to für so ziemlich alles. Was hast du heute im Kopf? Ich bin ganz Ohr! ✨👾",
+  pt: "Ei! Eu sou o KawnAI, sua ajuda para praticamente qualquer coisa. O que está na sua cabeça hoje? Estou ouvindo! ✨👾",
+  it: "Ehi! Sono KawnAI, il tuo punto di riferimento per praticamente qualsiasi cosa. Cosa ti passa per la testa oggi? Sono tutt’orecchi! ✨👾",
+  nl: "Hé! Ik ben KawnAI, jouw go-to voor bijna alles. Wat houdt je vandaag bezig? Ik luister! ✨👾",
+  tr: "Hey! Ben KawnAI, neredeyse her şey için yanındayım. Bugün aklında ne var? Kulaklarım sende! ✨👾",
+  ru: "Привет! Я KawnAI — твой помощник почти по любым вопросам. Что у тебя сегодня на уме? Я слушаю! ✨👾",
+  hi: "हे! मैं KawnAI हूँ—लगभग हर चीज़ में आपका go-to. आज आपके मन में क्या है? मैं सुन रहा/रही हूँ! ✨👾",
+  zh: "嘿！我是 KawnAI，几乎什么都能帮你。今天你在想什么？我在听！✨👾",
+  ja: "やあ！私は KawnAI。だいたい何でも頼れる相棒だよ。今日は何を考えてる？話してみて！✨👾",
+  ko: "안녕! 저는 KawnAI예요—거의 뭐든 도와주는 당신의 go-to. 오늘 무슨 생각이 드세요? 듣고 있어요! ✨👾",
+  id: "Hai! Aku KawnAI, andalan kamu untuk hampir apa pun. Hari ini kepikiran apa? Aku siap dengerin! ✨👾",
+  uk: "Привіт! Я KawnAI — твій помічник майже з будь-чим. Що в тебе сьогодні на думці? Я слухаю! ✨👾",
+  pl: "Hej! Jestem KawnAI — twoje wsparcie w praktycznie każdej sprawie. Co dziś masz na myśli? Słucham! ✨👾",
 };
 
 function normalizeLangTag(tag: string | undefined): string | null {
