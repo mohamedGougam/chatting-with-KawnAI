@@ -1,87 +1,26 @@
 import { NextResponse } from "next/server";
 
-import {
-  KAWN_AI_BACKEND_TIMEOUT_MS,
-  KAWN_AI_MAX_HISTORY_MESSAGES,
-  KAWN_AI_MAX_OUTPUT_TOKENS,
-} from "@/lib/kawnAiChatConfig";
-import { KAWN_WELCOME_MESSAGE } from "@/lib/kawnAiBranding";
 import { kawnAiSystemPrompt } from "@/lib/kawnAiSystemPrompt";
 import {
   buildMockKawnAiReply,
   type KawnAiChatRequest,
-  type KawnAiHistoryMessage,
 } from "@/lib/mockKawnAiReply";
 import { getOpenAIClient } from "@/lib/openaiClient";
 import { sanitizeKawnAiReplyForUser } from "@/lib/sanitizeKawnAiReply";
-
-function isWelcomeMessage(content: string): boolean {
-  const trimmed = content.trim();
-  if (!trimmed) return true;
-  if (trimmed === KAWN_WELCOME_MESSAGE) return true;
-  return /thanks for chatting with kawnai/i.test(trimmed);
-}
-
-function parseHistory(raw: unknown): KawnAiHistoryMessage[] {
-  if (!Array.isArray(raw)) return [];
-
-  const parsed: KawnAiHistoryMessage[] = [];
-  for (const item of raw) {
-    if (!item || typeof item !== "object") continue;
-    const entry = item as Record<string, unknown>;
-    const role = entry.role;
-    const content = entry.content;
-    if (role !== "user" && role !== "assistant") continue;
-    if (typeof content !== "string" || !content.trim()) continue;
-    if (role === "assistant" && isWelcomeMessage(content)) continue;
-    parsed.push({ role, content: content.trim() });
-  }
-
-  return parsed.slice(-KAWN_AI_MAX_HISTORY_MESSAGES);
-}
-
-function lastAssistantReply(history: KawnAiHistoryMessage[]): string | undefined {
-  for (let i = history.length - 1; i >= 0; i -= 1) {
-    if (history[i]?.role === "assistant") return history[i].content;
-  }
-  return undefined;
-}
-
-function polishReply(
-  rawReply: string,
-  history: KawnAiHistoryMessage[],
-): string {
-  return sanitizeKawnAiReplyForUser(rawReply, {
-    previousAssistantReply: lastAssistantReply(history),
-    hasConversationHistory: history.length > 0,
-  });
-}
-
-function buildUserContent(message: string, userLanguage?: string): string {
-  if (!userLanguage || userLanguage === "auto") return message;
-  return `${message}\n\n(Reply in the user's language: ${userLanguage})`;
-}
-
-async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("KAWNAI_TIMEOUT")), ms);
-  });
-  try {
-    return await Promise.race([promise, timeout]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-}
 
 /**
  * KawnAI chat — web + Flutter/mobile clients should call:
  *
  * `POST /api/kawn-ai/chat`
  *
- * Request body: `groupId`, `groupName`, `message` (required), optional `userId`,
- * `userLanguage`, `history` (recent `{ role, content }[]`, last 8 turns).
+ * Request body: `groupId`, `groupName`, `message` (required), optional `userId`, `userLanguage`.
  * Response: `{ "reply": string, "source": "kawnai" | "mock" }`
+ *
+ * // Future: add Azure Blob Storage community knowledge retrieval here.
+ * // Future: inject community-specific knowledge before calling the KawnAI model service.
+ *
+ * Uses OpenAI Responses API with optional built-in `web_search` (see `KAWNAI_WEB_SEARCH`)
+ * so schedule/group answers can follow current official sources, not only model training data.
  */
 export async function POST(req: Request) {
   let body: unknown;
@@ -99,6 +38,7 @@ export async function POST(req: Request) {
   const message = typeof b.message === "string" ? b.message : "";
   const groupId = typeof b.groupId === "string" ? b.groupId : "";
   const groupName = typeof b.groupName === "string" ? b.groupName : "";
+  const userName = typeof b.userName === "string" ? b.userName.trim() : "";
 
   if (!message.trim()) {
     return NextResponse.json({ error: "message is required" }, { status: 400 });
@@ -111,60 +51,80 @@ export async function POST(req: Request) {
     );
   }
 
-  const history = parseHistory(b.history);
-
   const payload: KawnAiChatRequest = {
     groupId,
     groupName,
     userId: typeof b.userId === "string" ? b.userId : undefined,
+    userName: userName || undefined,
     userLanguage: typeof b.userLanguage === "string" ? b.userLanguage : undefined,
     message,
-    history,
     metaInquiriesSoFar:
       typeof b.metaInquiriesSoFar === "number" && Number.isFinite(b.metaInquiriesSoFar)
         ? Math.max(0, Math.floor(b.metaInquiriesSoFar))
         : undefined,
   };
 
-  const userContent = buildUserContent(message, payload.userLanguage);
+  const userLanguage = payload.userLanguage;
+  const userId = payload.userId;
+
+  const userContent = `
+Optional Kawn community context (use only if the user is asking about this community, its topic, or something clearly tied to it—not for unrelated questions):
+- Group name: ${groupName}
+- Group ID: ${groupId}
+
+Session:
+- User ID: ${userId ?? "(not provided)"}
+- User name: ${userName || "(not provided)"}
+- User language: ${userLanguage ?? "auto"}
+
+User message:
+${message}
+`.trim();
 
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    const reply = polishReply(buildMockKawnAiReply(payload), history);
+    const reply = sanitizeKawnAiReplyForUser(buildMockKawnAiReply(payload));
     return NextResponse.json({ reply, source: "mock" as const });
   }
 
   try {
     const openai = getOpenAIClient();
     const model = process.env.KAWNAI_MODEL?.trim() || "gpt-4o";
-    const webSearchEnabled = process.env.KAWNAI_WEB_SEARCH === "1";
-
-    const input: Array<{ role: "user" | "assistant"; content: string }> = [
-      ...history,
-      { role: "user", content: userContent },
-    ];
+    // Web search helps with current events, schedules, and facts instead of relying on training data alone.
+    const webSearchEnabled = process.env.KAWNAI_WEB_SEARCH !== "0";
 
     const baseParams = {
       model,
       instructions: kawnAiSystemPrompt,
-      input,
-      max_output_tokens: KAWN_AI_MAX_OUTPUT_TOKENS,
+      input: [
+        {
+          role: "user" as const,
+          content: userContent,
+        },
+      ],
     };
 
-    const response = await withTimeout(
-      openai.responses.create({
+    let response;
+    try {
+      response = await openai.responses.create({
         ...baseParams,
         ...(webSearchEnabled
           ? { tools: [{ type: "web_search" as const }] }
           : {}),
-      }),
-      KAWN_AI_BACKEND_TIMEOUT_MS,
-    );
+      });
+    } catch (firstErr) {
+      if (!webSearchEnabled) throw firstErr;
+      console.warn(
+        "[kawn-ai/chat] OpenAI request with web_search failed; retrying without tools:",
+        firstErr,
+      );
+      response = await openai.responses.create(baseParams);
+    }
 
     const replyText = (response.output_text ?? "").trim();
     const rawReply =
       replyText.length > 0 ? replyText : buildMockKawnAiReply(payload);
-    const reply = polishReply(rawReply, history);
+    const reply = sanitizeKawnAiReplyForUser(rawReply);
 
     return NextResponse.json({
       reply,
@@ -172,7 +132,7 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error("[kawn-ai/chat] OpenAI request failed:", err);
-    const reply = polishReply(buildMockKawnAiReply(payload), history);
+    const reply = sanitizeKawnAiReplyForUser(buildMockKawnAiReply(payload));
     return NextResponse.json({ reply, source: "mock" as const });
   }
 }
