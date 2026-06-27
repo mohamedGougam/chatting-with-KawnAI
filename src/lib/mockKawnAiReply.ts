@@ -8,15 +8,27 @@ import {
   KAWN_BRAND_DEVELOPER_REPLY,
   KAWN_BRAND_IDENTITY_REPLY,
   KAWN_BRAND_LOCATION_REPLY,
+  KAWN_COMMUNITY_EXPLORATION_REPLY,
+  KAWN_FOOTBALL_SCHEDULE_UNAVAILABLE_REPLY,
+  KAWN_META_FIRST_REPLY,
+  KAWN_META_FOLLOW_UP_REPLY,
+  KAWN_WHAT_CAN_YOU_HELP_REPLY,
 } from "./kawnAiBranding";
 import {
   hintsCommunityExploration,
+  isFootballScheduleQuestion,
   isKawnAiAssistantIntroQuestion,
   isKawnDeveloperQuestion,
   isKawnIdentityQuestion,
   isKawnLocationQuestion,
   isMetaQuestion,
+  isWhatCanYouHelpQuestion,
 } from "./kawnAiRules";
+
+export type KawnAiHistoryMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 export type KawnAiChatRequest = {
   groupId: string;
@@ -24,6 +36,8 @@ export type KawnAiChatRequest = {
   userId?: string;
   userLanguage?: string;
   message: string;
+  /** Recent turns before the current user message (server keeps last 8). */
+  history?: KawnAiHistoryMessage[];
   /**
    * Optional. Used only by this fallback when the live model is unavailable.
    * Mobile clients may pass this for multi-turn provider-style answers.
@@ -31,27 +45,8 @@ export type KawnAiChatRequest = {
   metaInquiriesSoFar?: number;
 };
 
-const META_FIRST =
-  "I'm KawnAI Chat, here to help you inside Kawn.";
-const META_FOLLOW_UP =
-  "For more information, please contact the Kawn support team.";
-
-const COMMUNITY_REPLIES = [
-  "I can help you explore insights, trends, and useful information related to this community.",
-  "I'm here to help based on the community topic and available Kawn context. Tell me what you'd like to explore.",
-  "Tell me what you're looking for in this community, and I'll help guide you.",
-];
-
-function pickCommunityReply(message: string, groupName: string): string {
-  const seed = [...(message + groupName)].reduce(
-    (acc, ch) => acc + ch.charCodeAt(0),
-    0,
-  );
-  return COMMUNITY_REPLIES[seed % COMMUNITY_REPLIES.length];
-}
-
 export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
-  const { message, groupName, metaInquiriesSoFar = 0, userLanguage } = input;
+  const { message, metaInquiriesSoFar = 0, userLanguage } = input;
 
   if (isKawnLocationQuestion(message)) {
     return KAWN_BRAND_LOCATION_REPLY;
@@ -67,12 +62,20 @@ export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
   }
 
   if (isMetaQuestion(message)) {
-    return metaInquiriesSoFar >= 1 ? META_FOLLOW_UP : META_FIRST;
+    return metaInquiriesSoFar >= 1 ? KAWN_META_FOLLOW_UP_REPLY : KAWN_META_FIRST_REPLY;
+  }
+
+  if (isWhatCanYouHelpQuestion(message)) {
+    return KAWN_WHAT_CAN_YOU_HELP_REPLY;
+  }
+
+  if (isFootballScheduleQuestion(message)) {
+    return KAWN_FOOTBALL_SCHEDULE_UNAVAILABLE_REPLY;
   }
 
   if (hintsCommunityExploration(message)) {
-    return pickCommunityReply(message, groupName);
+    return KAWN_COMMUNITY_EXPLORATION_REPLY;
   }
 
-  return `I can help with a wide range of topics. For your question about that, a fuller answer will appear here when KawnAI is connected with live knowledge—in the meantime, try rephrasing or ask something more specific.`;
+  return "I'm here to help — could you share a bit more detail about what you're looking for?";
 }

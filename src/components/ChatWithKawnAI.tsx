@@ -1,11 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageCircle, Sparkles, User } from "lucide-react";
+import { Sparkles, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatMessageBody } from "@/components/ChatMessageBody";
 import { KawnLogo } from "@/components/KawnLogo";
+import { KAWN_WELCOME_MESSAGE } from "@/lib/kawnAiBranding";
+import {
+  KAWN_AI_CLIENT_TIMEOUT_MS,
+  KAWN_AI_MAX_HISTORY_MESSAGES,
+} from "@/lib/kawnAiChatConfig";
 
 type Role = "user" | "assistant";
 
@@ -15,15 +20,38 @@ export type ChatLine = {
   text: string;
 };
 
-const WELCOME = `✨ **Hi — I'm KawnAI.**
+const WELCOME = KAWN_WELCOME_MESSAGE;
 
-Thanks for chatting with KawnAI. Tell me what you would like to know, and I'll do my best to help.
+const TIMEOUT_MESSAGE =
+  "KawnAI is taking a little longer than usual. Please try again.";
 
-Ask about anything you're curious about—your community, sports, work, learning, or everyday questions.`;
+const OFFLINE_MESSAGE =
+  "Sorry — I couldn't reach KawnAI right now. Please try again.";
 
 /** Default context for the API when no community picker is shown (generic; clients may override). */
 const DEFAULT_GROUP_ID = "general";
 const DEFAULT_GROUP_NAME = "General";
+
+function isWelcomeLine(line: ChatLine): boolean {
+  return line.id === "welcome" || line.text.trim() === KAWN_WELCOME_MESSAGE;
+}
+
+function ThinkingDots() {
+  return (
+    <span className="inline-flex items-center gap-1" aria-hidden>
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="inline-block h-1.5 w-1.5 rounded-full bg-[#ff7a18] opacity-70"
+          style={{
+            animation: "kawnai-dot 1s ease-in-out infinite",
+            animationDelay: `${delay}ms`,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
 
 export function ChatWithKawnAI() {
   const [groupId] = useState<string>(DEFAULT_GROUP_ID);
@@ -34,6 +62,12 @@ export function ChatWithKawnAI() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
+  const linesRef = useRef(lines);
+
+  useEffect(() => {
+    linesRef.current = lines;
+  }, [lines]);
 
   const scrollToBottom = useCallback(() => {
     const el = listRef.current;
@@ -45,57 +79,76 @@ export function ChatWithKawnAI() {
     scrollToBottom();
   }, [lines, loading, scrollToBottom]);
 
-  const send = async () => {
+  const send = useCallback(async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || sendingRef.current) return;
 
+    sendingRef.current = true;
     setInput("");
+    setLoading(true);
+
     const userLine: ChatLine = {
       id: crypto.randomUUID(),
       role: "user",
       text,
     };
     setLines((prev) => [...prev, userLine]);
-    setLoading(true);
+
+    const history = linesRef.current
+      .filter((line) => !isWelcomeLine(line))
+      .slice(-KAWN_AI_MAX_HISTORY_MESSAGES)
+      .map((line) => ({
+        role: line.role,
+        content: line.text,
+      }));
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), KAWN_AI_CLIENT_TIMEOUT_MS);
 
     try {
-      /** Calls `POST /api/kawn-ai/chat` — same endpoint the Flutter app should use. */
       const res = await fetch("/api/kawn-ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           groupId,
           groupName,
           userId: "demo-user",
           userLanguage: "auto",
           message: text,
+          history,
         }),
       });
 
       if (!res.ok) {
-        throw new Error(`Request failed: ${res.status}`);
+        throw new Error("request_failed");
       }
 
       const data = (await res.json()) as { reply?: string };
-      const reply = data.reply?.trim() || "Something went wrong. Please try again.";
+      const reply =
+        data.reply?.trim() || "Something went wrong. Please try again.";
 
       setLines((prev) => [
         ...prev,
         { id: crypto.randomUUID(), role: "assistant", text: reply },
       ]);
-    } catch {
+    } catch (err) {
+      const isTimeout =
+        err instanceof DOMException && err.name === "AbortError";
       setLines((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          text: "Sorry — I couldn't reach KawnAI right now. Please try again.",
+          text: isTimeout ? TIMEOUT_MESSAGE : OFFLINE_MESSAGE,
         },
       ]);
     } finally {
+      clearTimeout(timeoutId);
+      sendingRef.current = false;
       setLoading(false);
     }
-  };
+  }, [groupId, groupName, input, loading]);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-[#0b0b0c] text-zinc-100">
@@ -189,16 +242,16 @@ export function ChatWithKawnAI() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex justify-start"
+            aria-live="polite"
+            aria-busy="true"
           >
             <div
               className="flex max-w-[min(100%,26rem)] items-center gap-3 rounded-2xl border border-zinc-700/80 bg-zinc-900/90 px-4 py-3.5 text-base text-zinc-400 sm:px-5"
               dir="ltr"
             >
-              <MessageCircle
-                className="h-5 w-5 shrink-0 text-[#ff7a18]"
-                aria-hidden
-              />
-              <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-[#ff7a18] border-t-transparent" />
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#ff7a18]/15">
+                <ThinkingDots />
+              </span>
               <span>KawnAI is thinking…</span>
             </div>
           </motion.div>

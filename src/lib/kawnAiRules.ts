@@ -218,3 +218,35 @@ export function hintsCommunityExploration(raw: string): boolean {
   ];
   return keys.some((k) => s.includes(k));
 }
+
+/** User asks what KawnAI can help with or do. */
+export function isWhatCanYouHelpQuestion(raw: string): boolean {
+  const s = norm(raw);
+  if (!s) return false;
+
+  return (
+    /\bwhat\s+can\s+you\s+(help|do)\b/.test(s) ||
+    /\bhow\s+can\s+you\s+help\b/.test(s) ||
+    /\bwhat\s+do\s+you\s+do\b/.test(s) ||
+    /\bwhat\s+are\s+you\s+(able|capable)\s+to\b/.test(s) ||
+    /\bwhat\s+can\s+kawnai\b/.test(s) ||
+    /\bhow\s+can\s+kawnai\s+help\b/.test(s)
+  );
+}
+
+/** User asks for live football / World Cup schedules or fixtures. */
+export function isFootballScheduleQuestion(raw: string): boolean {
+  const s = norm(raw);
+  if (!s) return false;
+
+  const football =
+    /\b(world\s*cup|fifa|football|soccer|match|matches|fixture|fixtures|kickoff|kick-off|schedule|tournament)\b/i.test(
+      s,
+    );
+  const liveOrWhen =
+    /\b(when|today|tonight|tomorrow|live|next\s+game|next\s+match|playing\s+now|who\s+plays)\b/i.test(
+      s,
+    );
+
+  return football && (liveOrWhen || /\bschedule\b/i.test(s));
+}
