@@ -4,7 +4,7 @@
  */
 
 export const KAWN_WELCOME_MESSAGE =
-  "Hey — glad you're here! I'm KawnAI. Tell me what you're curious about and we'll figure it out together.";
+  "Hey! Glad you're here. I'm KawnAI. Ask me anything you're curious about, from news and facts to everyday questions.";
 
 export const KAWN_BRAND_IDENTITY_REPLY =
   "Kawn is a community-driven social media app built to help people discover communities, connect around shared interests, and create meaningful conversations.";
@@ -16,42 +16,44 @@ export const KAWN_BRAND_LOCATION_REPLY =
   "Kawn is unlike other social media platforms. It is designed as a decentralized network that belongs to all the beautiful humans around the globe.";
 
 export const KAWN_META_FIRST_REPLY =
-  "I'm KawnAI — your chat buddy inside Kawn. Happy to help with whatever you need here!";
+  "I'm KawnAI, your chat buddy inside Kawn. Happy to help with whatever you need.";
 
 export const KAWN_META_FOLLOW_UP_REPLY =
   "For more information, please contact the Kawn support team.";
 
-export const KAWN_COMMUNITY_EXPLORATION_REPLY =
-  "Love that you're exploring this community! I can chat about its topics, brainstorm post ideas, answer questions, and help you find your angle. What caught your interest?";
+export const KAWN_GENERAL_TOPIC_REPLY =
+  "Sure! I can help you look into that, break it down, or point you in the right direction. What's the main thing you want to know?";
 
 export const KAWN_WHAT_CAN_YOU_HELP_REPLY =
-  "I can help you explore topics, spark post ideas, answer questions, translate text, explain ideas, and find your way around Kawn. What sounds fun to start with?";
+  "I can help with news, facts, explanations, ideas, translations, and pretty much any topic. What do you want to start with?";
 
 export const KAWN_DUPLICATE_REPLY_FALLBACK =
-  "Ha — I might be repeating myself! What should we dig into next?";
+  "Ha, I might be repeating myself! What should we dig into next?";
 
 export const KAWN_FOOTBALL_SCHEDULE_UNAVAILABLE_REPLY =
-  "I don't have live match schedules hooked up yet — but I'm totally up for World Cup chat: teams, players, history, hot takes. What do you want to talk about?";
+  "I don't have live match schedules hooked up yet, but I'm happy to chat about the World Cup, teams, players, or history. What do you want to talk about?";
 
 /** Short assistant self-intro when the user asks who KawnAI is (not the one-time welcome). */
 export const KAWN_ASSISTANT_INTRO_EN =
-  "I'm KawnAI — your friendly sidekick inside Kawn. I love helping with communities, ideas, and good conversations. What do you want to chat about?";
+  "I'm KawnAI, your chat buddy in Kawn. Ask me about news, facts, ideas, or anything on your mind. What do you want to talk about?";
 
 /** Varied casual greetings for social chat (mock + prompt reference). */
 export const KAWN_CASUAL_GREETING_REPLIES = [
-  "Hey! Good to see you — what's on your mind today?",
-  "Hi there! Want to talk about this community, or something totally random?",
-  "Hey again! Got a question, an idea for a post, or just here to hang out?",
-  "Hello! I'm all ears — what would you like to explore?",
-  "Hey! Pick anything: community topics, post ideas, or whatever you're curious about.",
+  "Hey! Good to see you. What's on your mind?",
+  "Hi there! News, a random fact, or something you've been wondering about?",
+  "Hey again! Got a question or just here to chat?",
+  "Hello! I'm all ears. What would you like to talk about?",
+  "Hey! Anything goes here. What are you curious about?",
 ] as const;
+
+/** @deprecated Use KAWN_GENERAL_TOPIC_REPLY */
+export const KAWN_COMMUNITY_EXPLORATION_REPLY = KAWN_GENERAL_TOPIC_REPLY;
 
 export function pickCasualGreetingReply(
   message: string,
-  groupName: string,
   priorAssistantCount = 0,
 ): string {
-  const seed = [...(message + groupName + String(priorAssistantCount))].reduce(
+  const seed = [...(message + String(priorAssistantCount))].reduce(
     (acc, ch) => acc + ch.charCodeAt(0),
     0,
   );
@@ -59,32 +61,29 @@ export function pickCasualGreetingReply(
   const base = KAWN_CASUAL_GREETING_REPLIES[idx] ?? KAWN_CASUAL_GREETING_REPLIES[0];
 
   if (priorAssistantCount >= 2) {
-    return `You're keeping me company — I like it! ${base}`;
-  }
-  if (groupName && groupName !== "General") {
-    return base.replace("this community", groupName);
+    return `You're keeping me company. I like it! ${base}`;
   }
   return base;
 }
 
 const ASSISTANT_INTRO_I18N: Record<string, string> = {
   en: KAWN_ASSISTANT_INTRO_EN,
-  ar: "أنا KawnAI Chat، المساعد داخل تطبيق Kawn. أستطيع المساعدة في الأسئلة والمجتمعات والمواضيع اليومية. بماذا تود أن نتحدث؟",
-  es: "Soy KawnAI Chat, el asistente dentro de Kawn. Puedo ayudarte con preguntas, comunidades y temas del día a día. ¿De qué te gustaría hablar?",
-  fr: "Je suis KawnAI Chat, l’assistant dans Kawn. Je peux t’aider avec des questions, des communautés et des sujets du quotidien. De quoi veux-tu parler ?",
-  de: "Ich bin KawnAI Chat, der Assistent in Kawn. Ich helfe bei Fragen, Communities und Alltagsthemen. Worüber möchtest du sprechen?",
-  pt: "Sou o KawnAI Chat, o assistente dentro do Kawn. Posso ajudar com perguntas, comunidades e assuntos do dia a dia. Sobre o que você gostaria de conversar?",
-  it: "Sono KawnAI Chat, l’assistente dentro Kawn. Posso aiutarti con domande, community e argomenti quotidiani. Di cosa vorresti parlare?",
-  nl: "Ik ben KawnAI Chat, de assistent in Kawn. Ik help met vragen, communities en alledaagse onderwerpen. Waar wil je het over hebben?",
-  tr: "Ben KawnAI Chat, Kawn içindeki asistanım. Sorular, topluluklar ve günlük konularda yardımcı olabilirim. Ne hakkında konuşmak istersin?",
-  ru: "Я KawnAI Chat — ассистент в Kawn. Могу помочь с вопросами, сообществами и повседневными темами. О чём хотите поговорить?",
-  hi: "मैं KawnAI Chat हूँ — Kawn के अंदर आपका सहायक। मैं सवालों, समुदायों और रोज़मर्रा के विषयों में मदद कर सकता/सकती हूँ। आप किस बारे में बात करना चाहेंगे?",
-  zh: "我是 KawnAI Chat，Kawn 里的助手。我可以帮你解答问题、了解社区和日常话题。你想聊什么？",
-  ja: "私は KawnAI Chat、Kawn の中のアシスタントです。質問やコミュニティ、日常の話題を手伝えます。何について話したいですか？",
-  ko: "저는 KawnAI Chat, Kawn 안의 도우미예요. 질문, 커뮤니티, 일상 주제를 도와드릴 수 있어요. 무엇에 대해 이야기하고 싶으세요?",
-  id: "Saya KawnAI Chat, asisten di dalam Kawn. Saya bisa membantu pertanyaan, komunitas, dan topik sehari-hari. Mau ngobrol tentang apa?",
-  uk: "Я KawnAI Chat — асистент у Kawn. Можу допомогти з питаннями, спільнотами та повсякденними темами. Про що хочете поговорити?",
-  pl: "Jestem KawnAI Chat, asystent w Kawn. Mogę pomóc z pytaniami, społecznościami i codziennymi tematami. O czym chcesz porozmawiać?",
+  ar: "أنا KawnAI، رفيق الدردشة في Kawn. اسألني عن الأخبار أو الحقائق أو الأفكار أو أي شيء يدور في بالك. بماذا تود أن نتحدث؟",
+  es: "Soy KawnAI, tu compañero de chat en Kawn. Pregúntame sobre noticias, datos, ideas o lo que tengas en mente. ¿De qué quieres hablar?",
+  fr: "Je suis KawnAI, ton compagnon de chat dans Kawn. Pose-moi des questions sur l'actu, des faits, des idées ou ce que tu veux. De quoi veux-tu parler ?",
+  de: "Ich bin KawnAI, dein Chat-Buddy in Kawn. Frag mich zu News, Fakten, Ideen oder was auch immer dir durch den Kopf geht. Worüber möchtest du reden?",
+  pt: "Sou o KawnAI, seu parceiro de chat no Kawn. Pergunte sobre notícias, fatos, ideias ou o que estiver na sua cabeça. Sobre o que você quer conversar?",
+  it: "Sono KawnAI, il tuo compagno di chat in Kawn. Chiedimi di notizie, fatti, idee o qualsiasi cosa ti passi per la testa. Di cosa vuoi parlare?",
+  nl: "Ik ben KawnAI, je chatmaatje in Kawn. Vraag me over nieuws, feiten, ideeën of wat je maar wilt. Waar wil je het over hebben?",
+  tr: "Ben KawnAI, Kawn'daki sohbet arkadaşın. Haberler, bilgiler, fikirler veya aklındaki her şeyi sor. Ne hakkında konuşmak istersin?",
+  ru: "Я KawnAI, твой собеседник в Kawn. Спрашивай про новости, факты, идеи или что угодно. О чём хочешь поговорить?",
+  hi: "मैं KawnAI हूँ, Kawn में आपका चैट बडी। समाचार, तथ्य, विचार या कुछ भी पूछिए। आप किस बारे में बात करना चाहेंगे?",
+  zh: "我是 KawnAI，你在 Kawn 里的聊天伙伴。新闻、知识、想法或任何话题都可以问。你想聊什么？",
+  ja: "私は KawnAI、Kawn のチャット相手です。ニュース、事実、アイデア、何でも聞いてください。何について話したいですか？",
+  ko: "저는 KawnAI, Kawn 안의 채팅 친구예요. 뉴스, 사실, 아이디어, 뭐든 물어보세요. 무엇에 대해 이야기하고 싶으세요?",
+  id: "Saya KawnAI, teman ngobrolmu di Kawn. Tanya soal berita, fakta, ide, atau apa pun. Mau ngobrol tentang apa?",
+  uk: "Я KawnAI, твій співрозмовник у Kawn. Питай про новини, факти, ідеї або що завгодно. Про що хочеш поговорити?",
+  pl: "Jestem KawnAI, twój rozmówca w Kawn. Pytaj o wiadomości, fakty, pomysły lub cokolwiek. O czym chcesz porozmawiać?",
 };
 
 function normalizeLangTag(tag: string | undefined): string | null {

@@ -8,8 +8,8 @@ import {
   KAWN_BRAND_DEVELOPER_REPLY,
   KAWN_BRAND_IDENTITY_REPLY,
   KAWN_BRAND_LOCATION_REPLY,
-  KAWN_COMMUNITY_EXPLORATION_REPLY,
   KAWN_FOOTBALL_SCHEDULE_UNAVAILABLE_REPLY,
+  KAWN_GENERAL_TOPIC_REPLY,
   KAWN_META_FIRST_REPLY,
   KAWN_META_FOLLOW_UP_REPLY,
   KAWN_WHAT_CAN_YOU_HELP_REPLY,
@@ -48,12 +48,12 @@ export type KawnAiChatRequest = {
 };
 
 export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
-  const { message, groupName, metaInquiriesSoFar = 0, userLanguage, history = [] } = input;
+  const { message, metaInquiriesSoFar = 0, userLanguage, history = [] } = input;
 
   const priorAssistantCount = history.filter((t) => t.role === "assistant").length;
 
   if (isCasualGreeting(message)) {
-    return pickCasualGreetingReply(message, groupName, priorAssistantCount);
+    return pickCasualGreetingReply(message, priorAssistantCount);
   }
 
   if (isKawnLocationQuestion(message)) {
@@ -82,8 +82,8 @@ export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
   }
 
   if (hintsCommunityExploration(message)) {
-    return KAWN_COMMUNITY_EXPLORATION_REPLY;
+    return KAWN_GENERAL_TOPIC_REPLY;
   }
 
-  return "I'm here for it — tell me a bit more and we'll figure it out together!";
+  return "I'm here for it. Tell me a bit more and we'll figure it out together.";
 }

@@ -57,14 +57,9 @@ function polishReply(
   });
 }
 
-function buildUserContent(
-  message: string,
-  groupName: string,
-  userLanguage?: string,
-): string {
-  const lang =
-    userLanguage && userLanguage !== "auto" ? ` | lang: ${userLanguage}` : "";
-  return `Group: ${groupName}${lang}\n\n${message}`;
+function buildUserContent(message: string, userLanguage?: string): string {
+  if (!userLanguage || userLanguage === "auto") return message;
+  return `${message}\n\n(Reply in the user's language: ${userLanguage})`;
 }
 
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -131,11 +126,7 @@ export async function POST(req: Request) {
         : undefined,
   };
 
-  const userContent = buildUserContent(
-    message,
-    groupName,
-    payload.userLanguage,
-  );
+  const userContent = buildUserContent(message, payload.userLanguage);
 
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {

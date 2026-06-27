@@ -30,6 +30,8 @@ const WELCOME_PATTERNS = [
   "What’s on your mind today",
   "How can I help you with the Kawn Community today",
   "How can I help you with",
+  "Welcome to the Kawn Community",
+  "welcome to the kawn community",
   KAWN_ASSISTANT_INTRO_EN,
 ];
 
@@ -87,8 +89,18 @@ function isRoboticSupportLine(text: string): boolean {
   return (
     /how can i help you with/.test(n) ||
     /how can i help you today/.test(n) ||
-    /how may i assist/.test(n)
+    /how may i assist/.test(n) ||
+    /welcome to the kawn community/.test(n)
   );
+}
+
+/** Replace stiff dash-heavy phrasing with more natural punctuation. */
+function humanizePunctuation(text: string): string {
+  let out = text.replace(/\s*[—–]\s*/g, ". ");
+  out = out.replace(/(?<=\w)\s+-\s+(?=[A-Za-z])/g, ", ");
+  out = out.replace(/\.\s*\./g, ".");
+  out = out.replace(/,\s*,/g, ",");
+  return out.replace(/\s{2,}/g, " ").trim();
 }
 
 function softenRoboticReply(text: string, hasConversationHistory: boolean): string {
@@ -139,6 +151,7 @@ export function sanitizeKawnAiReplyForUser(
   }
 
   out = removeDuplicateSentences(out);
+  out = humanizePunctuation(out);
 
   out = out
     .split("\n")

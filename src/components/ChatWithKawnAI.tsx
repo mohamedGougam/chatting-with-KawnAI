@@ -158,7 +158,7 @@ export function ChatWithKawnAI() {
       >
         <div className="flex flex-col gap-3 sm:gap-3.5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ff7a18] sm:text-sm">
-            Kawn community
+            Ask anything
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
             <KawnLogo
@@ -171,7 +171,7 @@ export function ChatWithKawnAI() {
                 Chat with KawnAI
               </h1>
               <p className="mt-1.5 text-base leading-snug text-zinc-400 sm:mt-2 sm:text-lg">
-                Ask anything you want to know
+                News, facts, ideas, and everyday questions
               </p>
             </div>
           </div>
