@@ -13,9 +13,11 @@ import {
   KAWN_META_FIRST_REPLY,
   KAWN_META_FOLLOW_UP_REPLY,
   KAWN_WHAT_CAN_YOU_HELP_REPLY,
+  pickCasualGreetingReply,
 } from "./kawnAiBranding";
 import {
   hintsCommunityExploration,
+  isCasualGreeting,
   isFootballScheduleQuestion,
   isKawnAiAssistantIntroQuestion,
   isKawnDeveloperQuestion,
@@ -46,7 +48,13 @@ export type KawnAiChatRequest = {
 };
 
 export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
-  const { message, metaInquiriesSoFar = 0, userLanguage } = input;
+  const { message, groupName, metaInquiriesSoFar = 0, userLanguage, history = [] } = input;
+
+  const priorAssistantCount = history.filter((t) => t.role === "assistant").length;
+
+  if (isCasualGreeting(message)) {
+    return pickCasualGreetingReply(message, groupName, priorAssistantCount);
+  }
 
   if (isKawnLocationQuestion(message)) {
     return KAWN_BRAND_LOCATION_REPLY;
@@ -77,5 +85,5 @@ export function buildMockKawnAiReply(input: KawnAiChatRequest): string {
     return KAWN_COMMUNITY_EXPLORATION_REPLY;
   }
 
-  return "I'm here to help — could you share a bit more detail about what you're looking for?";
+  return "I'm here for it — tell me a bit more and we'll figure it out together!";
 }

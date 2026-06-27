@@ -28,6 +28,8 @@ const WELCOME_PATTERNS = [
   "your go-to for pretty much anything",
   "What's on your mind today",
   "What’s on your mind today",
+  "How can I help you with the Kawn Community today",
+  "How can I help you with",
   KAWN_ASSISTANT_INTRO_EN,
 ];
 
@@ -80,6 +82,23 @@ function stripRepeatedWelcomePhrases(text: string): string {
   return out.replace(/\s{2,}/g, " ").trim();
 }
 
+function isRoboticSupportLine(text: string): boolean {
+  const n = normalizeForCompare(text);
+  return (
+    /how can i help you with/.test(n) ||
+    /how can i help you today/.test(n) ||
+    /how may i assist/.test(n)
+  );
+}
+
+function softenRoboticReply(text: string, hasConversationHistory: boolean): string {
+  if (!hasConversationHistory) return text;
+  if (isRoboticSupportLine(text) && text.length < 160) {
+    return KAWN_DUPLICATE_REPLY_FALLBACK;
+  }
+  return text;
+}
+
 function preventIdenticalConsecutiveReply(
   text: string,
   previousAssistantReply?: string,
@@ -88,7 +107,12 @@ function preventIdenticalConsecutiveReply(
 
   const current = normalizeForCompare(text);
   const previous = normalizeForCompare(previousAssistantReply);
-  if (!current || current !== previous) return text;
+  if (!current || current !== previous) {
+    if (isRoboticSupportLine(text) && isRoboticSupportLine(previousAssistantReply)) {
+      return KAWN_DUPLICATE_REPLY_FALLBACK;
+    }
+    return text;
+  }
 
   const withoutWelcome = stripRepeatedWelcomePhrases(text);
   if (normalizeForCompare(withoutWelcome) && withoutWelcome !== text) {
@@ -111,6 +135,7 @@ export function sanitizeKawnAiReplyForUser(
 
   if (options.hasConversationHistory) {
     out = stripRepeatedWelcomePhrases(out);
+    out = softenRoboticReply(out, true);
   }
 
   out = removeDuplicateSentences(out);

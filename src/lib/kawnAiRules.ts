@@ -250,3 +250,21 @@ export function isFootballScheduleQuestion(raw: string): boolean {
 
   return football && (liveOrWhen || /\bschedule\b/i.test(s));
 }
+
+/** Short casual greeting — hi, hey, hello, etc. */
+export function isCasualGreeting(raw: string): boolean {
+  const s = norm(raw);
+  if (!s || s.length > 48) return false;
+
+  const greeting =
+    /^(hi|hey|hello|hola|yo|sup|hiya|heya|howdy|greetings|salut|ciao|ola|hallo|gm|gn|good\s+(morning|afternoon|evening|night))[\s!.,?]*$/i.test(
+      s,
+    ) ||
+    /^(hi|hey|hello)[\s!.,?]*there[\s!.,?]*$/i.test(s) ||
+    /^(what'?s\s+up|whats\s+up|wassup)[\s!.,?]*$/i.test(s) ||
+    /^hi+[\s!.,?]*$/i.test(s) ||
+    /^(مرحبا|مرحبًا|أهلا|السلام\s+عليكم|سلام)[\s!.,?]*$/i.test(s) ||
+    /^(你好|嗨|哈喽)[\s!.,?]*$/i.test(s);
+
+  return greeting;
+}

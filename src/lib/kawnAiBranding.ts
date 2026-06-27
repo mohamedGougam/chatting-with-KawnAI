@@ -4,7 +4,7 @@
  */
 
 export const KAWN_WELCOME_MESSAGE =
-  "Thanks for chatting with KawnAI. Tell me what you would like to know, and I'll check it for you.";
+  "Hey — glad you're here! I'm KawnAI. Tell me what you're curious about and we'll figure it out together.";
 
 export const KAWN_BRAND_IDENTITY_REPLY =
   "Kawn is a community-driven social media app built to help people discover communities, connect around shared interests, and create meaningful conversations.";
@@ -16,26 +16,56 @@ export const KAWN_BRAND_LOCATION_REPLY =
   "Kawn is unlike other social media platforms. It is designed as a decentralized network that belongs to all the beautiful humans around the globe.";
 
 export const KAWN_META_FIRST_REPLY =
-  "I'm KawnAI Chat, here to help you inside Kawn.";
+  "I'm KawnAI — your chat buddy inside Kawn. Happy to help with whatever you need here!";
 
 export const KAWN_META_FOLLOW_UP_REPLY =
   "For more information, please contact the Kawn support team.";
 
 export const KAWN_COMMUNITY_EXPLORATION_REPLY =
-  "I can help you explore the topic of this community, discuss ideas, answer questions, and guide conversations related to it.";
+  "Love that you're exploring this community! I can chat about its topics, brainstorm post ideas, answer questions, and help you find your angle. What caught your interest?";
 
 export const KAWN_WHAT_CAN_YOU_HELP_REPLY =
-  "I can help you explore topics, answer questions, create posts or replies, translate text, explain ideas, and guide you through Kawn. What would you like to do first?";
+  "I can help you explore topics, spark post ideas, answer questions, translate text, explain ideas, and find your way around Kawn. What sounds fun to start with?";
 
 export const KAWN_DUPLICATE_REPLY_FALLBACK =
-  "Let me understand that better. What would you like me to focus on?";
+  "Ha — I might be repeating myself! What should we dig into next?";
 
 export const KAWN_FOOTBALL_SCHEDULE_UNAVAILABLE_REPLY =
-  "I don't have the live match schedule connected yet, but I can still help with World Cup information, teams, players, history and discussions.";
+  "I don't have live match schedules hooked up yet — but I'm totally up for World Cup chat: teams, players, history, hot takes. What do you want to talk about?";
 
 /** Short assistant self-intro when the user asks who KawnAI is (not the one-time welcome). */
 export const KAWN_ASSISTANT_INTRO_EN =
-  "I'm KawnAI Chat, the assistant inside Kawn. I can help with questions, communities, and everyday topics. What would you like to talk about?";
+  "I'm KawnAI — your friendly sidekick inside Kawn. I love helping with communities, ideas, and good conversations. What do you want to chat about?";
+
+/** Varied casual greetings for social chat (mock + prompt reference). */
+export const KAWN_CASUAL_GREETING_REPLIES = [
+  "Hey! Good to see you — what's on your mind today?",
+  "Hi there! Want to talk about this community, or something totally random?",
+  "Hey again! Got a question, an idea for a post, or just here to hang out?",
+  "Hello! I'm all ears — what would you like to explore?",
+  "Hey! Pick anything: community topics, post ideas, or whatever you're curious about.",
+] as const;
+
+export function pickCasualGreetingReply(
+  message: string,
+  groupName: string,
+  priorAssistantCount = 0,
+): string {
+  const seed = [...(message + groupName + String(priorAssistantCount))].reduce(
+    (acc, ch) => acc + ch.charCodeAt(0),
+    0,
+  );
+  const idx = (seed + priorAssistantCount) % KAWN_CASUAL_GREETING_REPLIES.length;
+  const base = KAWN_CASUAL_GREETING_REPLIES[idx] ?? KAWN_CASUAL_GREETING_REPLIES[0];
+
+  if (priorAssistantCount >= 2) {
+    return `You're keeping me company — I like it! ${base}`;
+  }
+  if (groupName && groupName !== "General") {
+    return base.replace("this community", groupName);
+  }
+  return base;
+}
 
 const ASSISTANT_INTRO_I18N: Record<string, string> = {
   en: KAWN_ASSISTANT_INTRO_EN,
